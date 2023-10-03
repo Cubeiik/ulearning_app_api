@@ -20,12 +20,6 @@ class UserController extends Controller
     public function createUser(Request $request)
     {
 
-        return response()->json([
-            'status'=>true,
-            'data'=>"my data",
-            'message'=>'new message'
-        ], 200);
-
         try {
             //Validated
             $validateUser = Validator::make($request->all(), 
@@ -35,7 +29,7 @@ class UserController extends Controller
                 'open_id' => 'required',
                 'name' => 'required',
                 'email' => 'required',
-                'password' => 'required|min:6'
+                //'password' => 'required|min:6'
             ]);
 
             if($validateUser->fails()){
@@ -57,17 +51,29 @@ class UserController extends Controller
 
             $user = User::where($map)->first();
 
+            
+
             //whether user has already logged in or not
 
             if(empty($user->id)){
+                
                 //this certain user has never been in our database
                 //our job is to assign the user in the database
                 //this token is user id
                 $validated['token'] = md5(uniqid().rand(10000,99999));
+                
                 //user first time created
                 $validated['created_at'] = Carbon::now();
+                
                 //encript password
-                $validated['password'] = Hash::make($validated['password']);
+                //$validated['password'] = Hash::make($validated['password']);
+
+                // return response()->json([
+                //     'status'=>true,
+                //     'data'=>$validated,
+                //     'message'=>'passed validattion'
+                // ], 200);
+                
                 //returns the id of the row after saving
                 $userID = User::insertGetId($validated);
                 //users all the information
@@ -78,8 +84,8 @@ class UserController extends Controller
                 $userInfo->access_token = $accessToken;
                 User::where('id', '=', $userID)->update(['access_token'=>$accessToken]);
                 return response()->json([
-                    'status' => true,
-                    'message' => 'User Created Successfully',
+                    'code' => 200,
+                    'msg' => 'User Created Successfully',
                     'data' => $userInfo
                 ], 200);
             }
@@ -89,9 +95,9 @@ class UserController extends Controller
             $user->access_token = $accessToken;
             User::where('open_id', '=', $validated['open_id'])->update(['access_token'=>$accessToken]);
             return response()->json([
-                'status' => true,
-                'message' => 'User logged in Successfully',
-                'token' => $user
+                'code' => 200,
+                'msg' => 'User logged in Successfully',
+                'data' => $user
             ], 200);
 
         } catch (\Throwable $th) {
