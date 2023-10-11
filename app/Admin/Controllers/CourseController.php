@@ -47,6 +47,8 @@ class CourseController extends AdminController
         $grid->column('score', __('Score'));
         $grid->column('created_at', __('Created at'));
         $grid->column('updated_at', __('Updated at'));
+        $grid->column('downloadable_res', __('Resources num'));
+
 
         return $grid;
     }
@@ -95,7 +97,9 @@ class CourseController extends AdminController
         //decimal method helps with retrieving float format from the database
         $form->decimal('price', __('Price'));
         $form->number('lesson_num', __('Lesson number'));
-        $form->number('video_length', __('Video length'));
+        $form->number('video_len', __('Video length'));
+        $form->number('downloadable_res', __('Resources num'));
+
         //who is posting
         $result = User::pluck('name', 'token');
         $form->select('user_token', __('Teacher'))->options($result);

@@ -23,6 +23,10 @@ Route::group(['namespace'=>'Api'], function(){
     //authentication middleware
     Route::group(['middleware'=>'auth:sanctum'], function(){
         Route::any('/courseList', 'CourseController@courseList');
+        Route::any('/courseDetail', 'CourseController@courseDetail');
+        Route::any('/checkout', 'PayController@checkout');
+
+
     });
 
 });
