@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Stripe\Webhook;
@@ -30,7 +31,7 @@ class PayController extends Controller
                 /*
                     Stipe api key
                 */
-                Stripe::setApiKey('sk_test_51O05fALXAs8ZXsk4uTORehBWZoAgkHvdlvh6ObWvgEHmEiCHTazawgaqzRtcpA0QWImoH5iVrA014ukELxwbSOeq00lcEalaF2');
+                Stripe::setApiKey('sk_test_51O0NgiJAJxlbRRiZwABqAcECyq0hjwlEJnB1QhCr8ulLjLy0GvXXfxYcuUw0ZuwOfgVpXrLMvTFy1vUAR8KbsIEq00uCDgUiw8');
 
 
                 $courseResult = Course::where('id', '=', $courseId)->first();
@@ -60,8 +61,8 @@ class PayController extends Controller
                     return response()->json([
                         'code' => 400,
                         'msg'=>'You already bought this course',
-                        'data'=>$orderRes
-                    ], 400);
+                        'data'=>''
+                    ]);
                 }
                 //new order for the user and let's submit
                 $YOUR_DOMAIN = env('APP_URL');
@@ -100,7 +101,7 @@ class PayController extends Controller
                 //returning stripe payment url
                 return response()->json([
                     'code'=> 200,
-                    'msg'=> 'success',
+                    'msg'=> 'You bought it successfully',
                     'data'=>$checkOutSession->url
                 ], 200);
 
@@ -113,4 +114,54 @@ class PayController extends Controller
             }
         
     }
+
+    public function web_go_hooks()
+    {
+       // Log::info("11211-------");
+        Stripe::setApiKey('sk_test_51O0NgiJAJxlbRRiZwABqAcECyq0hjwlEJnB1QhCr8ulLjLy0GvXXfxYcuUw0ZuwOfgVpXrLMvTFy1vUAR8KbsIEq00uCDgUiw8');
+        $endpoint_secret = 'whsec_Xzo52vTl1gZxDTbg4eWejqCwGMNvcDXm';
+        $payload = @file_get_contents('php://input');
+        $sig_header = $_SERVER['HTTP_STRIPE_SIGNATURE'];
+        $event = null;
+      //  Log::info("payload----" . $payload);
+
+        try {
+            $event = \Stripe\Webhook::constructEvent(
+                $payload,
+                $sig_header,
+                $endpoint_secret
+            );
+        } catch (\UnexpectedValueException $e) {
+            // Invalid payload
+          //  Log::info("UnexpectedValueException" . $e);
+            http_response_code(400);
+            exit();
+        } catch (\Stripe\Exception\SignatureVerificationException $e) {
+            // Invalid signature
+        //    Log::info("SignatureVerificationException" . $e);
+            http_response_code(400);
+            exit();
+        }
+     //   Log::info("event---->" . $event);
+        // Handle the checkout.session.completed event
+        if ($event->type == 'charge.succeeded') {
+            $session = $event->data->object;
+           // Log::info("event->data->object---->" . $session);
+            $metadata = $session["metadata"];
+            $order_num = $metadata->order_num;
+            $user_token = $metadata->user_token;
+            Log::info("order_id---->" . $order_num);
+            $map = [];
+            $map["status"] = 1;
+            $map["updated_at"] = Carbon::now();
+            $whereMap = [];
+            $whereMap["user_token"] = $user_token;
+            $whereMap["id"] = $order_num;
+            Order::where($whereMap)->update($map);
+        }
+
+
+        http_response_code(200);
+    }
 }
+
