@@ -90,7 +90,7 @@ class LessonController extends AdminController
 
         }else{
             //normal form submission or form creating
-            //$form->text('video', __('Video'));
+            // $form->text('video', __('Video'));
             $form->table('video', function($form){
                 $form->text('name')->rules('required');
                 $form->image('thumbnail')->uniqueName()->rules('required');

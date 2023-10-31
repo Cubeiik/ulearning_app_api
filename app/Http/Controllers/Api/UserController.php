@@ -40,6 +40,8 @@ class UserController extends Controller
                 ], 401);
             }
 
+            
+
             //validated will have all user field values
             //we can save in database
             $validated = $validateUser->validated();
@@ -47,13 +49,15 @@ class UserController extends Controller
             $map=[];
             //email, phone, google, facebook, apple
             $map['type'] = $validated['type'];
-            $map['open_id'] = $validated['open_id'];
-
-            $user = User::where($map)->first();
+            //$map['open_id'] = $validated['open_id'];
 
             
 
+            $user = User::where($map)->first();
+
             //whether user has already logged in or not
+            //empty means tha doesnt exist
+            //then save the user in the database for the first time
 
             if(empty($user->id)){
                 
@@ -88,6 +92,7 @@ class UserController extends Controller
                     'msg' => 'User Created Successfully',
                     'data' => $userInfo
                 ], 200);
+
             }
             //user previously has logged in
 

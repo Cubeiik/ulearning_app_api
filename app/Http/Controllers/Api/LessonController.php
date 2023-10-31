@@ -38,15 +38,16 @@ class LessonController extends Controller
     public function lessonDetail(Request $request){
         try{
             $lessonId = $request->id;
-            $result = Lesson::where('id', '=', $lessonId)->select(
-                 'id',
-                 'video'
-            )->first();
+        //     $result = Lesson::where('id', '=', $lessonId)->select( //select wybiera jakie kolumny chcemy wyciągnąć
+        //         'id',
+        //         'video'
+        //    )->first();
+            $result = Lesson::where('id', '=', $lessonId)->first();
 
             return response()->json([
                 'code'=>200,
                 'msg'=>'success',
-                'data'=>$result,
+                'data'=>$result->video,
             ], 200);
         }catch(\Exception $e){
             return response()->json([
