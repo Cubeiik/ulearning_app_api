@@ -49,7 +49,7 @@ class UserController extends Controller
             $map=[];
             //email, phone, google, facebook, apple
             $map['type'] = $validated['type'];
-            //$map['open_id'] = $validated['open_id'];
+            $map['open_id'] = $validated['open_id'];
 
             
 
